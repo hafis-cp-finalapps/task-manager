@@ -1,4 +1,4 @@
-import { format } from "date-fns";
+import { format, differenceInDays, isBefore } from "date-fns";
 import {
   MoreHorizontal,
   Pencil,
@@ -22,12 +22,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 
 interface TodoCardProps {
   todo: DisplayTodo;
@@ -35,17 +29,23 @@ interface TodoCardProps {
   onDelete: () => void;
 }
 
-const priorityStyles: Record<Priority, { dot: string; shadow: string; label: string }> = {
-  low: { dot: "bg-sky-500", shadow: "shadow-sky-500/50", label: "Low" },
-  medium: { dot: "bg-orange-500", shadow: "shadow-orange-500/50", label: "Medium" },
-  high: { dot: "bg-red-500", shadow: "shadow-red-500/50", label: "High" },
+const priorityConfig: Record<Priority, { label: string; variant: "destructive" | "secondary" | "outline" }> = {
+    high: { label: "High", variant: "destructive" },
+    medium: { label: "Medium", variant: "secondary" },
+    low: { label: "Low", variant: "outline" },
 };
 
 
 export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
-  const priorityStyle = priorityStyles[todo.priority];
   const dueDate = todo.dueDate instanceof Date ? todo.dueDate : new Date(todo.dueDate);
-  const isOverdue = new Date() > dueDate && todo.state !== "Done";
+  const isDone = todo.state.toLowerCase() === 'done' || todo.state.toLowerCase() === 'completed';
+
+  const daysRemaining = differenceInDays(dueDate, new Date());
+
+  const isOverdue = !isDone && isBefore(dueDate, new Date());
+  const isApproaching = !isDone && !isOverdue && daysRemaining <= 2;
+
+  const { label, variant } = priorityConfig[todo.priority];
 
   return (
     <Card>
@@ -75,31 +75,22 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
             {todo.description}
           </p>
         )}
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                   <div className={cn("h-3 w-3 rounded-full shadow-md", priorityStyle.dot, priorityStyle.shadow)} />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>
-                    Priority:{" "}
-                    {todo.priority.charAt(0).toUpperCase() +
-                      todo.priority.slice(1)}
-                  </p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <Badge variant={variant} className="text-xs font-medium">
+              {label}
+            </Badge>
             <Badge variant="outline" className="text-xs">{todo.state}</Badge>
           </div>
           <div
             className={cn(
-              "flex items-center text-xs",
-              isOverdue && "text-destructive font-medium"
+              "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium",
+              isOverdue && "bg-destructive/20 text-destructive",
+              isApproaching && "bg-chart-4/20 text-chart-4",
+              !isOverdue && !isApproaching && "text-muted-foreground"
             )}
           >
-            <CalendarIcon className="mr-1 h-4 w-4" />
+            <CalendarIcon className="h-3 w-3" />
             <span>{format(dueDate, "MMM d")}</span>
           </div>
         </div>
