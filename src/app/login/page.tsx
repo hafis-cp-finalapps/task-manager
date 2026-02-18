@@ -27,7 +27,7 @@ export default function LoginPage() {
               Welcome to TaskFlow
             </h1>
             <p className="text-sm text-muted-foreground">
-              Enter your credentials to sign in or create an account
+              Sign in with your Google account to continue
             </p>
           </div>
           <AuthForm />

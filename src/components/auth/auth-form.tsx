@@ -1,17 +1,10 @@
 "use client";
 
 import * as React from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/firebase";
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
   GoogleAuthProvider,
   signInWithPopup,
 } from "firebase/auth";
@@ -20,48 +13,10 @@ import { Loader2 } from "lucide-react";
 
 interface AuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
-const authSchema = z.object({
-  email: z.string().email({ message: "Please enter a valid email address." }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters." }),
-});
-
-type FormData = z.infer<typeof authSchema>;
-
 export function AuthForm({ className, ...props }: AuthFormProps) {
   const auth = useAuth();
   const { toast } = useToast();
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isGoogleLoading, setIsGoogleLoading] = React.useState<boolean>(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>({
-    resolver: zodResolver(authSchema),
-  });
-
-  const handleAuthAction = async (data: FormData, action: "signIn" | "signUp") => {
-    setIsLoading(true);
-    try {
-      if (action === "signIn") {
-        await signInWithEmailAndPassword(auth, data.email, data.password);
-      } else {
-        await createUserWithEmailAndPassword(auth, data.email, data.password);
-      }
-      // Redirect is handled by the root page
-    } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Failed",
-        description: error.message,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
   
   const handleGoogleSignIn = async () => {
     setIsGoogleLoading(true);
@@ -83,71 +38,7 @@ export function AuthForm({ className, ...props }: AuthFormProps) {
 
   return (
     <div className={cn("grid gap-6", className)} {...props}>
-      <form>
-        <div className="grid gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              placeholder="name@example.com"
-              type="email"
-              autoCapitalize="none"
-              autoComplete="email"
-              autoCorrect="off"
-              disabled={isLoading || isGoogleLoading}
-              {...register("email")}
-            />
-            {errors?.email && (
-              <p className="px-1 text-xs text-destructive">
-                {errors.email.message}
-              </p>
-            )}
-          </div>
-          <div className="grid gap-2">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              placeholder="••••••••"
-              type="password"
-              disabled={isLoading || isGoogleLoading}
-              {...register("password")}
-            />
-            {errors?.password && (
-              <p className="px-1 text-xs text-destructive">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-2">
-             <Button
-              onClick={handleSubmit(data => handleAuthAction(data, "signIn"))}
-              disabled={isLoading || isGoogleLoading}
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign In
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleSubmit(data => handleAuthAction(data, "signUp"))}
-              disabled={isLoading || isGoogleLoading}
-            >
-              {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Sign Up
-            </Button>
-          </div>
-        </div>
-      </form>
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-background px-2 text-muted-foreground">
-            Or continue with
-          </span>
-        </div>
-      </div>
-      <Button variant="outline" type="button" disabled={isLoading || isGoogleLoading} onClick={handleGoogleSignIn}>
+      <Button variant="outline" type="button" disabled={isGoogleLoading} onClick={handleGoogleSignIn}>
         {isGoogleLoading ? (
           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
         ) : (
@@ -170,7 +61,7 @@ export function AuthForm({ className, ...props }: AuthFormProps) {
             />
           </svg>
         )}{" "}
-        Google
+        Sign in with Google
       </Button>
     </div>
   );
