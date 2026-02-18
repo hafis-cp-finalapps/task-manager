@@ -61,7 +61,7 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
   };
   
   return (
-    <Card className="transition-shadow hover:shadow-lg cursor-pointer" onClick={handleCardClick}>
+    <Card className="transition-shadow hover:shadow-lg cursor-pointer flex flex-col" onClick={handleCardClick}>
       <CardHeader className="flex flex-row items-start justify-between p-4 pb-2">
         <div className="flex-1" >
           <CardTitle className="text-base font-semibold leading-tight pr-2">{todo.label}</CardTitle>
@@ -92,12 +92,14 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
-      <CardContent className="p-4 pt-0">
-        {todo.description && (
-          <p className="mb-3 text-sm text-muted-foreground break-words line-clamp-2">
-            {todo.description}
-          </p>
-        )}
+      <CardContent className="p-4 pt-0 flex-grow flex flex-col justify-between">
+        <div>
+          {todo.description && (
+            <p className="mb-3 text-sm text-muted-foreground break-words line-clamp-2">
+              {todo.description}
+            </p>
+          )}
+        </div>
         <div className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
             <Badge variant={variant} className="text-xs font-medium">
