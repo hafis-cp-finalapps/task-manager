@@ -68,7 +68,7 @@ export function TodoToolbar({
             {PRIORITIES.map((p) => (
                 <Button
                     key={p.value}
-                    variant={priorityFilter.includes(p.value) ? "secondary" : "outline"}
+                    variant={priorityFilter.includes(p.value) ? "default" : "outline"}
                     size="sm"
                     onClick={() => handlePriorityToggle(p.value)}
                 >
@@ -81,7 +81,7 @@ export function TodoToolbar({
             {availableStates.map((s) => (
                 <Button
                     key={s}
-                    variant={stateFilter.includes(s) ? "secondary" : "outline"}
+                    variant={stateFilter.includes(s) ? "default" : "outline"}
                     size="sm"
                     onClick={() => handleStateToggle(s)}
                 >
