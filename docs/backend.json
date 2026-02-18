@@ -1,0 +1,197 @@
+{
+  "entities": {
+    "UserProfile": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "UserProfile",
+      "type": "object",
+      "description": "Represents a user's profile within the TaskFlow application, containing personal settings and references to owned data.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the UserProfile entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name or full name."
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user profile was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the user profile was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "displayName",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "State": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "State",
+      "type": "object",
+      "description": "Represents a customizable status or progress stage that a user can define for their todo items (e.g., 'Todo', 'Ongoing', 'Completed', 'Shelved').",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the State entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The human-readable name of the state (e.g., 'Todo', 'Ongoing')."
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional detailed description of the state."
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who owns this custom state. (Relationship: UserProfile 1:N State)"
+        },
+        "order": {
+          "type": "number",
+          "description": "An optional numerical value to define the display order of states for the user."
+        },
+        "colorHex": {
+          "type": "string",
+          "description": "An optional hexadecimal color code associated with the state for UI representation (e.g., '#RRGGBB')."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "userId"
+      ]
+    },
+    "Todo": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Todo",
+      "type": "object",
+      "description": "Represents a single task or to-do item created by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Todo entity."
+        },
+        "label": {
+          "type": "string",
+          "description": "The main title or short description of the todo item."
+        },
+        "description": {
+          "type": "string",
+          "description": "An optional detailed description of the todo item."
+        },
+        "dueDate": {
+          "type": "string",
+          "description": "The date and time by which the todo item is expected to be completed.",
+          "format": "date-time"
+        },
+        "priority": {
+          "type": "string",
+          "description": "The priority level of the todo item (e.g., 'Low', 'Medium', 'High')."
+        },
+        "stateId": {
+          "type": "string",
+          "description": "Reference to the current State of this todo item. (Relationship: State 1:N Todo)"
+        },
+        "userId": {
+          "type": "string",
+          "description": "Reference to the UserProfile who owns this todo item. (Relationship: UserProfile 1:N Todo)"
+        },
+        "createdAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the todo item was created.",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "description": "Timestamp indicating when the todo item was last updated.",
+          "format": "date-time"
+        }
+      },
+      "required": [
+        "id",
+        "label",
+        "dueDate",
+        "priority",
+        "stateId",
+        "userId",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "anonymous"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "UserProfile",
+          "schema": {
+            "$ref": "#/backend/entities/UserProfile"
+          },
+          "description": "Represents a single user's profile, where the document ID (`{userId}`) is identical to the Firebase Authentication UID. This document serves as the root for all data owned by this specific user."
+        }
+      },
+      {
+        "path": "/users/{userId}/states/{stateId}",
+        "definition": {
+          "entityName": "State",
+          "schema": {
+            "$ref": "#/backend/entities/State"
+          },
+          "description": "Stores customizable states (e.g., 'Todo', 'Ongoing') defined by a specific user for their todo items. The 'userId' field in each document is denormalized from the path for authorization independence and data consistency.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this custom state, matching the Firebase Auth UID."
+            },
+            {
+              "name": "stateId",
+              "description": "The unique identifier for a specific custom state."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/users/{userId}/todos/{todoId}",
+        "definition": {
+          "entityName": "Todo",
+          "schema": {
+            "$ref": "#/backend/entities/Todo"
+          },
+          "description": "Stores individual todo items owned by a specific user. The 'userId' field in each document is denormalized from the path for authorization independence and data consistency.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier of the user who owns this todo item, matching the Firebase Auth UID."
+            },
+            {
+              "name": "todoId",
+              "description": "The unique identifier for a specific todo item."
+            }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The recommended Firestore structure for TaskFlow leverages a user-centric, hierarchical model to ensure robust security, scalability, and ease of debugging. All user-specific data, including their profile, custom states, and todo items, are nested directly under a top-level `/users/{userId}` document.\n\n**Authorization Independence:** This structure achieves Authorization Independence by placing all user-owned data as subcollections of the `/users/{userId}` path. For example, a user's todo items are found at `/users/{userId}/todos/{todoId}`. Firestore security rules can then directly use the `{userId}` wildcard from the path to verify `request.auth.uid == userId`, eliminating the need for expensive and complex `get()` calls to check parent documents for ownership. While `userId` is present in the `State` and `Todo` documents themselves, this is primarily for data integrity and easier data portability; the path remains the primary source of authorization context for rules. This design also supports atomic creation of a user's profile and initial settings or a todo and its sub-entities without breaking rule checks.\n\n**QAPs (Rules are not Filters):** This structure inherently supports secure `list` operations (QAPs). Since `states` and `todos` are subcollections of a specific user's path (`/users/{userId}/states` and `/users/{userId}/todos`), any `list` query made by an authenticated user to their own path (e.g., `db.collection('users').doc(request.auth.uid).collection('todos').get()`) will only ever return data owned by that user. The security rules will enforce that `request.auth.uid` matches `userId` in the path, preventing users from listing or accessing other users' private data. This means the application can confidently query these collections, knowing the security rules will correctly filter out unauthorized access at the database level, rather than relying on client-side filtering for security."
+  }
+}
