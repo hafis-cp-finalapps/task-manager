@@ -2,15 +2,7 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { ListFilter, PlusCircle, Search } from "lucide-react";
+import { PlusCircle, Search } from "lucide-react";
 import type { Priority } from "@/lib/types";
 import { PRIORITIES } from "@/lib/constants";
 
@@ -63,29 +55,6 @@ export function TodoToolbar({
                 />
             </div>
             <div className="flex items-center gap-2">
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-10 gap-1">
-                        <ListFilter className="h-3.5 w-3.5" />
-                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                            Filter States
-                        </span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuLabel>Filter by State</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        {availableStates.map((s) => (
-                        <DropdownMenuCheckboxItem
-                            key={s}
-                            checked={stateFilter.includes(s)}
-                            onCheckedChange={() => handleStateToggle(s)}
-                        >
-                            {s}
-                        </DropdownMenuCheckboxItem>
-                        ))}
-                    </DropdownMenuContent>
-                </DropdownMenu>
                 <Button size="sm" className="h-10 gap-1" onClick={onAddTodo}>
                     <PlusCircle className="h-3.5 w-3.5" />
                     <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
@@ -104,6 +73,19 @@ export function TodoToolbar({
                     onClick={() => handlePriorityToggle(p.value)}
                 >
                     {p.label}
+                </Button>
+            ))}
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">State:</span>
+            {availableStates.map((s) => (
+                <Button
+                    key={s}
+                    variant={stateFilter.includes(s) ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => handleStateToggle(s)}
+                >
+                    {s}
                 </Button>
             ))}
         </div>
