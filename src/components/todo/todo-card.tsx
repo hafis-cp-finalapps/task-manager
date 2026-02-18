@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow } from "date-fns";
+import { format } from "date-fns";
 import {
   MoreHorizontal,
   Pencil,
@@ -14,8 +14,6 @@ import { cn } from "@/lib/utils";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -53,21 +51,15 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
   const PriorityIcon = priorityIcons[todo.priority].icon;
 
   const dueDate = todo.dueDate instanceof Date ? todo.dueDate : new Date(todo.dueDate);
-  const createdAt = todo.createdAt instanceof Date ? todo.createdAt : new Date(todo.createdAt);
   const isOverdue = new Date() > dueDate && todo.state !== "Done";
 
   return (
-    <Card className="flex flex-col">
-      <CardHeader className="flex flex-row items-start gap-4">
-        <div className="flex-1">
-          <CardTitle className="text-lg font-semibold">{todo.label}</CardTitle>
-          <CardDescription>
-            Created {formatDistanceToNow(createdAt, { addSuffix: true })}
-          </CardDescription>
-        </div>
+    <Card>
+      <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
+        <CardTitle className="text-base font-semibold leading-tight">{todo.label}</CardTitle>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-8 w-8">
+            <Button size="icon" variant="ghost" className="h-6 w-6 flex-shrink-0">
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
@@ -83,41 +75,41 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
           </DropdownMenuContent>
         </DropdownMenu>
       </CardHeader>
-      <CardContent className="flex-grow space-y-2">
-        <div className="flex items-center gap-2">
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger>
-                <PriorityIcon
-                  className={cn(
-                    "h-5 w-5",
-                    priorityIcons[todo.priority].className
-                  )}
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>
-                  Priority:{" "}
-                  {todo.priority.charAt(0).toUpperCase() +
-                    todo.priority.slice(1)}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-          <Badge variant="outline">{todo.state}</Badge>
+      <CardContent className="p-4 pt-0">
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <PriorityIcon
+                    className={cn(
+                      "h-5 w-5",
+                      priorityIcons[todo.priority].className
+                    )}
+                  />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>
+                    Priority:{" "}
+                    {todo.priority.charAt(0).toUpperCase() +
+                      todo.priority.slice(1)}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+            <Badge variant="outline" className="text-xs">{todo.state}</Badge>
+          </div>
+          <div
+            className={cn(
+              "flex items-center text-xs",
+              isOverdue && "text-destructive font-medium"
+            )}
+          >
+            <CalendarIcon className="mr-1 h-4 w-4" />
+            <span>{format(dueDate, "MMM d")}</span>
+          </div>
         </div>
       </CardContent>
-      <CardFooter>
-        <div
-          className={cn(
-            "flex items-center text-sm text-muted-foreground",
-            isOverdue && "text-destructive font-medium"
-          )}
-        >
-          <CalendarIcon className="mr-1 h-4 w-4" />
-          <span>{isOverdue ? "Overdue:" : "Due:"} {format(dueDate, "PPP")}</span>
-        </div>
-      </CardFooter>
     </Card>
   );
 }
