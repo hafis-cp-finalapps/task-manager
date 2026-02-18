@@ -4,9 +4,6 @@ import {
   Pencil,
   Trash2,
   CalendarIcon,
-  ArrowDownCircle,
-  MinusCircle,
-  ArrowUpCircle,
 } from "lucide-react";
 import type { Priority, DisplayTodo } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -38,25 +35,22 @@ interface TodoCardProps {
   onDelete: () => void;
 }
 
-const priorityIcons: Record<
-  Priority,
-  { icon: React.ElementType; className: string }
-> = {
-  low: { icon: ArrowDownCircle, className: "text-green-500" },
-  medium: { icon: MinusCircle, className: "text-yellow-500" },
-  high: { icon: ArrowUpCircle, className: "text-red-500" },
+const priorityStyles: Record<Priority, { dot: string; shadow: string; label: string }> = {
+  low: { dot: "bg-sky-500", shadow: "shadow-sky-500/50", label: "Low" },
+  medium: { dot: "bg-orange-500", shadow: "shadow-orange-500/50", label: "Medium" },
+  high: { dot: "bg-red-500", shadow: "shadow-red-500/50", label: "High" },
 };
 
-export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
-  const PriorityIcon = priorityIcons[todo.priority].icon;
 
+export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
+  const priorityStyle = priorityStyles[todo.priority];
   const dueDate = todo.dueDate instanceof Date ? todo.dueDate : new Date(todo.dueDate);
   const isOverdue = new Date() > dueDate && todo.state !== "Done";
 
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between p-4 pb-2">
-        <CardTitle className="text-base font-semibold leading-tight">{todo.label}</CardTitle>
+      <CardHeader className="flex flex-row items-start justify-between p-4 pb-2">
+        <CardTitle className="text-base font-semibold leading-tight pr-2">{todo.label}</CardTitle>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button size="icon" variant="ghost" className="h-6 w-6 flex-shrink-0">
@@ -77,7 +71,7 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
       </CardHeader>
       <CardContent className="p-4 pt-0">
         {todo.description && (
-          <p className="mb-2 text-sm text-muted-foreground break-words">
+          <p className="mb-3 text-sm text-muted-foreground break-words line-clamp-2">
             {todo.description}
           </p>
         )}
@@ -86,12 +80,7 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <PriorityIcon
-                    className={cn(
-                      "h-5 w-5",
-                      priorityIcons[todo.priority].className
-                    )}
-                  />
+                   <div className={cn("h-3 w-3 rounded-full shadow-md", priorityStyle.dot, priorityStyle.shadow)} />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>

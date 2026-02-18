@@ -6,7 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 
-import type { DisplayTodo, State, Todo } from "@/lib/types";
+import type { DisplayTodo, State, Todo, Priority } from "@/lib/types";
 import { PRIORITIES } from "@/lib/constants";
 
 import { Button } from "@/components/ui/button";
@@ -28,13 +28,6 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Popover,
   PopoverContent,
   PopoverTrigger,
@@ -43,6 +36,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Textarea } from "../ui/textarea";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const formSchema = z.object({
   label: z.string().min(1, "Label is required"),
@@ -61,6 +55,12 @@ interface TodoFormProps {
   todo: DisplayTodo | null;
   availableStates: State[];
 }
+
+const priorityConfig: Record<Priority, { label: string; color: string; ring: string }> = {
+  low: { label: "Low", color: "bg-sky-500", ring: "ring-sky-500" },
+  medium: { label: "Medium", color: "bg-orange-500", ring: "ring-orange-500" },
+  high: { label: "High", color: "bg-red-500", ring: "ring-red-500" },
+};
 
 export function TodoForm({
   isOpen,
@@ -82,24 +82,26 @@ export function TodoForm({
   });
 
   useEffect(() => {
-    if (todo) {
-      const todoState = availableStates.find(s => s.name === todo.state);
-      form.reset({
-        label: todo.label,
-        description: todo.description || "",
-        priority: todo.priority,
-        stateId: todoState?.id,
-        dueDate: todo.dueDate instanceof Date ? todo.dueDate : new Date(todo.dueDate),
-      });
-    } else {
-      const defaultState = availableStates.find(s => s.name.toLowerCase() === 'to-do') || availableStates[0];
-      form.reset({
-        label: "",
-        description: "",
-        priority: "medium",
-        stateId: defaultState?.id || "",
-        dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
-      });
+    if (isOpen) {
+      if (todo) {
+        const todoState = availableStates.find(s => s.name === todo.state);
+        form.reset({
+          label: todo.label,
+          description: todo.description || "",
+          priority: todo.priority,
+          stateId: todoState?.id,
+          dueDate: todo.dueDate instanceof Date ? todo.dueDate : new Date(todo.dueDate),
+        });
+      } else {
+        const defaultState = availableStates.find(s => s.name.toLowerCase() === 'to-do') || availableStates[0];
+        form.reset({
+          label: "",
+          description: "",
+          priority: "medium",
+          stateId: defaultState?.id || "",
+          dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
+        });
+      }
     }
   }, [todo, isOpen, form, availableStates]);
 
@@ -109,7 +111,7 @@ export function TodoForm({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[480px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{todo ? "Edit Task" : "Add New Task"}</DialogTitle>
           <DialogDescription>
@@ -119,7 +121,7 @@ export function TodoForm({
           </DialogDescription>
         </DialogHeader>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-4 py-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="grid gap-6">
             <FormField
               control={form.control}
               name="label"
@@ -133,7 +135,128 @@ export function TodoForm({
                 </FormItem>
               )}
             />
-             <FormField
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <FormField
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Due Date</FormLabel>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-full pl-3 text-left font-normal",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "PPP")
+                              ) : (
+                                <span>Pick a date</span>
+                              )}
+                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1))}
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Priority</FormLabel>
+                    <FormControl>
+                      <RadioGroup
+                        onValueChange={field.onChange}
+                        value={field.value}
+                        className="flex items-center justify-around pt-2"
+                      >
+                        {PRIORITIES.map((p) => {
+                          const config = priorityConfig[p.value];
+                          return (
+                            <FormItem key={p.value} className="flex items-center space-x-0 space-y-0">
+                               <FormControl>
+                                <RadioGroupItem value={p.value} id={p.value} className="sr-only" />
+                              </FormControl>
+                              <FormLabel
+                                htmlFor={p.value}
+                                className="flex cursor-pointer flex-col items-center gap-2 rounded-md p-2 hover:bg-accent"
+                              >
+                                <span
+                                  className={cn(
+                                    "h-5 w-5 rounded-full ring-2 ring-offset-2 ring-offset-background",
+                                    config.color,
+                                    field.value === p.value ? config.ring : "ring-transparent"
+                                  )}
+                                />
+                                <span className="text-xs font-medium">{config.label}</span>
+                              </FormLabel>
+                            </FormItem>
+                          );
+                         })}
+                      </RadioGroup>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            
+            <FormField
+              control={form.control}
+              name="stateId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>State</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="flex flex-wrap gap-2"
+                    >
+                      {availableStates.map((s) => (
+                        <FormItem key={s.id} className="flex items-center space-x-0 space-y-0">
+                          <FormControl>
+                            <RadioGroupItem value={s.id} id={'state-' + s.id} className="sr-only" />
+                          </FormControl>
+                          <FormLabel
+                            htmlFor={'state-' + s.id}
+                            className={cn(
+                              "cursor-pointer rounded-full border px-3 py-1.5 text-xs font-medium transition-colors",
+                              field.value === s.id
+                                ? "border-transparent bg-primary text-primary-foreground"
+                                : "border-border bg-transparent text-foreground hover:bg-accent hover:text-accent-foreground"
+                            )}
+                          >
+                            {s.name}
+                          </FormLabel>
+                        </FormItem>
+                      ))}
+                    </RadioGroup>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
               control={form.control}
               name="description"
               render={({ field }) => (
@@ -151,97 +274,7 @@ export function TodoForm({
                 </FormItem>
               )}
             />
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="priority"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Priority</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select priority" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {PRIORITIES.map((p) => (
-                          <SelectItem key={p.value} value={p.value}>
-                            {p.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="dueDate"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Due Date</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "PPP")
-                            ) : (
-                              <span>Pick a date</span>
-                            )}
-                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() - 1))}
-                          initialFocus
-                        />
-                      </PopoverContent>
-                    </Popover>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            <FormField
-              control={form.control}
-              name="stateId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>State</FormLabel>
-                  <div className="flex gap-2">
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select a state" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {availableStates.map((s) => (
-                          <SelectItem key={s.id} value={s.id}>
-                            {s.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
             <DialogFooter>
               <Button type="button" variant="ghost" onClick={onClose}>
                 Cancel
