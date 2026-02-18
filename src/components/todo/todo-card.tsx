@@ -76,6 +76,11 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
         </DropdownMenu>
       </CardHeader>
       <CardContent className="p-4 pt-0">
+        {todo.description && (
+          <p className="mb-2 text-sm text-muted-foreground break-words">
+            {todo.description}
+          </p>
+        )}
         <div className="flex items-center justify-between text-sm text-muted-foreground">
           <div className="flex items-center gap-2">
             <TooltipProvider>

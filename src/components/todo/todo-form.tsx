@@ -42,9 +42,11 @@ import {
 import { Calendar } from "@/components/ui/calendar";
 import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Textarea } from "../ui/textarea";
 
 const formSchema = z.object({
   label: z.string().min(1, "Label is required"),
+  description: z.string().optional(),
   priority: z.enum(["low", "medium", "high"]),
   stateId: z.string().min(1, "State is required"),
   dueDate: z.date({ required_error: "A due date is required." }),
@@ -72,6 +74,7 @@ export function TodoForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
       label: "",
+      description: "",
       priority: "medium",
       stateId: availableStates[0]?.id || "",
       dueDate: new Date(),
@@ -83,6 +86,7 @@ export function TodoForm({
       const todoState = availableStates.find(s => s.name === todo.state);
       form.reset({
         label: todo.label,
+        description: todo.description || "",
         priority: todo.priority,
         stateId: todoState?.id,
         dueDate: todo.dueDate instanceof Date ? todo.dueDate : new Date(todo.dueDate),
@@ -91,6 +95,7 @@ export function TodoForm({
       const defaultState = availableStates.find(s => s.name.toLowerCase() === 'to-do') || availableStates[0];
       form.reset({
         label: "",
+        description: "",
         priority: "medium",
         stateId: defaultState?.id || "",
         dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
@@ -123,6 +128,24 @@ export function TodoForm({
                   <FormLabel>Task</FormLabel>
                   <FormControl>
                     <Input placeholder="e.g. Finalize project report" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Add a more detailed description..."
+                      className="resize-none"
+                      {...field}
+                      value={field.value || ''}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
