@@ -75,7 +75,7 @@ export default function TodosPage() {
   }, [todos, states]);
 
   const filteredTodos = useMemo(() => {
-    const stateIdFilter = states.filter(s => stateFilter.includes(s.name)).map(s => s.id);
+    const stateIdFilterSet = new Set(states.filter(s => stateFilter.includes(s.name)).map(s => s.id));
 
     return displayTodos
       .filter((todo) =>
@@ -87,9 +87,9 @@ export default function TodosPage() {
       )
       .filter(
         (todo) =>
-          stateIdFilter.length === 0 || stateIdFilter.includes(todos.find(t => t.id === todo.id)!.stateId)
+          stateIdFilterSet.size === 0 || stateIdFilterSet.has(todo.stateId)
       );
-  }, [displayTodos, todos, searchTerm, priorityFilter, stateFilter, states]);
+  }, [displayTodos, searchTerm, priorityFilter, stateFilter, states]);
   
   if (isUserLoading || isSettingsLoading) {
      return (

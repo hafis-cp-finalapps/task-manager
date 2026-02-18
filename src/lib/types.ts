@@ -22,7 +22,7 @@ export interface Todo {
   updatedAt: Timestamp | Date | string;
 }
 
-export interface DisplayTodo extends Omit<Todo, 'stateId' | 'dueDate' | 'createdAt' | 'updatedAt'> {
+export interface DisplayTodo extends Omit<Todo, 'dueDate' | 'createdAt' | 'updatedAt'> {
   state: string;
   dueDate: Date;
   createdAt: Date;

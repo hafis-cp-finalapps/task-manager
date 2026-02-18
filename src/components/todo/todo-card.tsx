@@ -47,22 +47,36 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
 
   const { label, variant } = priorityConfig[todo.priority];
 
+  const handleDropdownClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <Card>
+    <Card onClick={onEdit} className="cursor-pointer transition-shadow hover:shadow-lg">
       <CardHeader className="flex flex-row items-start justify-between p-4 pb-2">
         <CardTitle className="text-base font-semibold leading-tight pr-2">{todo.label}</CardTitle>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button size="icon" variant="ghost" className="h-6 w-6 flex-shrink-0">
+            <Button
+              size="icon"
+              variant="ghost"
+              className="h-6 w-6 flex-shrink-0"
+              onClick={handleDropdownClick}
+            >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit}>
+            <DropdownMenuItem onClick={handleDropdownClick}>
               <Pencil className="mr-2 h-4 w-4" />
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={onDelete} className="text-destructive">
+            <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }} 
+              className="text-destructive focus:text-destructive focus:bg-destructive/10"
+            >
               <Trash2 className="mr-2 h-4 w-4" />
               Delete
             </DropdownMenuItem>
@@ -85,8 +99,8 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
           <div
             className={cn(
               "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium",
-              isOverdue && "bg-destructive text-destructive-foreground",
-              isApproaching && "bg-warning text-warning-foreground",
+              isOverdue && "bg-destructive/20 text-destructive",
+              isApproaching && "bg-warning/20 text-warning",
               !isOverdue && !isApproaching && "text-muted-foreground"
             )}
           >
