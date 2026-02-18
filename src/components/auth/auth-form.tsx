@@ -10,11 +10,13 @@ import {
 } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 interface AuthFormProps extends React.HTMLAttributes<HTMLDivElement> {}
 
 export function AuthForm({ className, ...props }: AuthFormProps) {
   const auth = useAuth();
+  const router = useRouter();
   const { toast } = useToast();
   const [isGoogleLoading, setIsGoogleLoading] = React.useState<boolean>(false);
   
@@ -23,7 +25,8 @@ export function AuthForm({ className, ...props }: AuthFormProps) {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      // Redirect is handled by the root page
+      // Redirect is handled after successful sign-in.
+      router.replace('/todos');
     } catch (error: any) {
       toast({
         variant: "destructive",
