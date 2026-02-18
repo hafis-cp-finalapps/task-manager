@@ -24,6 +24,8 @@ body {
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
+    --warning: 25 95% 53%;
+    --warning-foreground: 0 0% 100%;
     --border: 259 15% 88%;
     --input: 259 15% 88%;
     --ring: 203 56% 60%;
@@ -59,6 +61,8 @@ body {
     --accent-foreground: 255 10% 10%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
+    --warning: 27 96% 61%;
+    --warning-foreground: 255 10% 10%;
     --border: 255 10% 20%;
     --input: 255 10% 20%;
     --ring: 203 66% 70%;

@@ -85,8 +85,8 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
           <div
             className={cn(
               "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium",
-              isOverdue && "bg-destructive/20 text-destructive",
-              isApproaching && "bg-chart-4/20 text-chart-4",
+              isOverdue && "bg-destructive text-destructive-foreground",
+              isApproaching && "bg-warning text-warning-foreground",
               !isOverdue && !isApproaching && "text-muted-foreground"
             )}
           >
