@@ -48,7 +48,7 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
   const { label, variant } = priorityConfig[todo.priority];
 
   return (
-    <Card onClick={onEdit} className="cursor-pointer transition-shadow hover:shadow-lg">
+    <Card className="transition-shadow hover:shadow-lg">
       <CardHeader className="flex flex-row items-start justify-between p-4 pb-2">
         <CardTitle className="text-base font-semibold leading-tight pr-2">{todo.label}</CardTitle>
         <DropdownMenu>
@@ -57,24 +57,17 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
               size="icon"
               variant="ghost"
               className="h-6 w-6 flex-shrink-0"
-              onClick={(e) => e.stopPropagation()}
             >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                onEdit();
-              }}
-            >
+            <DropdownMenuItem onClick={onEdit}>
               <Pencil className="mr-2 h-4 w-4" />
               Edit
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={(e) => {
-                e.stopPropagation();
-                onDelete();
-              }} 
+            <DropdownMenuItem
+              onClick={onDelete}
               className="text-destructive focus:text-destructive focus:bg-destructive/10"
             >
               <Trash2 className="mr-2 h-4 w-4" />
