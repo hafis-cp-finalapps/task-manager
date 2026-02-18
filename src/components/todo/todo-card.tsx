@@ -47,10 +47,6 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
 
   const { label, variant } = priorityConfig[todo.priority];
 
-  const handleDropdownClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   return (
     <Card onClick={onEdit} className="cursor-pointer transition-shadow hover:shadow-lg">
       <CardHeader className="flex flex-row items-start justify-between p-4 pb-2">
@@ -61,13 +57,17 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
               size="icon"
               variant="ghost"
               className="h-6 w-6 flex-shrink-0"
-              onClick={handleDropdownClick}
+              onClick={(e) => e.stopPropagation()}
             >
               <MoreHorizontal className="h-4 w-4" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={handleDropdownClick}>
+            <DropdownMenuItem onClick={(e) => {
+                e.stopPropagation();
+                onEdit();
+              }}
+            >
               <Pencil className="mr-2 h-4 w-4" />
               Edit
             </DropdownMenuItem>
@@ -100,7 +100,7 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
             className={cn(
               "flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium",
               isOverdue && "bg-destructive/20 text-destructive",
-              isApproaching && "bg-warning/20 text-warning",
+              isApproaching && "bg-warning/20 text-warning-foreground",
               !isOverdue && !isApproaching && "text-muted-foreground"
             )}
           >

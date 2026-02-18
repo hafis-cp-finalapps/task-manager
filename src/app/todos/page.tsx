@@ -13,6 +13,16 @@ import { TodoToolbar } from "@/components/todo/todo-toolbar";
 import { TodoList } from "@/components/todo/todo-list";
 import { TodoForm } from "@/components/todo/todo-form";
 import { Timestamp } from "firebase/firestore";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function TodosPage() {
   const { user, isUserLoading } = useUser();
@@ -23,6 +33,7 @@ export default function TodosPage() {
 
   const [editingTodo, setEditingTodo] = useState<DisplayTodo | null>(null);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [todoToDelete, setTodoToDelete] = useState<string | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
   const [priorityFilter, setPriorityFilter] = useState<Priority[]>([]);
@@ -59,7 +70,18 @@ export default function TodosPage() {
   };
 
   const handleDeleteTodo = (id: string) => {
-    deleteTodo(id);
+    setTodoToDelete(id);
+  };
+
+  const confirmDelete = () => {
+    if (todoToDelete) {
+      deleteTodo(todoToDelete);
+      setTodoToDelete(null);
+    }
+  };
+
+  const cancelDelete = () => {
+    setTodoToDelete(null);
   };
 
   const displayTodos = useMemo((): DisplayTodo[] => {
@@ -126,6 +148,20 @@ export default function TodosPage() {
         todo={editingTodo}
         availableStates={states}
       />
+      <AlertDialog open={!!todoToDelete} onOpenChange={(open) => !open && cancelDelete()}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete your task.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={cancelDelete}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Continue</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
