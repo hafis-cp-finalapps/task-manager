@@ -35,14 +35,13 @@ export function TodoToolbar({
   onAddTodo,
   availableStates,
 }: TodoToolbarProps) {
-
   const handlePriorityToggle = (priority: Priority) => {
     const newFilter = priorityFilter.includes(priority)
       ? priorityFilter.filter((p) => p !== priority)
       : [...priorityFilter, priority];
     onPriorityFilterChange(newFilter);
   };
-  
+
   const handleStateToggle = (state: string) => {
     const newFilter = stateFilter.includes(state)
       ? stateFilter.filter((s) => s !== state)
@@ -51,60 +50,63 @@ export function TodoToolbar({
   };
 
   return (
-    <div className="flex items-center justify-between gap-4">
-      <div className="flex flex-1 items-center gap-4">
-        <div className="relative w-full max-w-sm">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search tasks..."
-            value={searchTerm}
-            onChange={(e) => onSearchTermChange(e.target.value)}
-            className="pl-10"
-          />
+    <div className="space-y-4">
+        <div className="flex items-center justify-between gap-4">
+            <div className="relative w-full max-w-sm">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                    type="search"
+                    placeholder="Search tasks..."
+                    value={searchTerm}
+                    onChange={(e) => onSearchTermChange(e.target.value)}
+                    className="pl-10"
+                />
+            </div>
+            <div className="flex items-center gap-2">
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" size="sm" className="h-10 gap-1">
+                        <ListFilter className="h-3.5 w-3.5" />
+                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                            Filter States
+                        </span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-48">
+                        <DropdownMenuLabel>Filter by State</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        {availableStates.map((s) => (
+                        <DropdownMenuCheckboxItem
+                            key={s}
+                            checked={stateFilter.includes(s)}
+                            onCheckedChange={() => handleStateToggle(s)}
+                        >
+                            {s}
+                        </DropdownMenuCheckboxItem>
+                        ))}
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                <Button size="sm" className="h-10 gap-1" onClick={onAddTodo}>
+                    <PlusCircle className="h-3.5 w-3.5" />
+                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                    Add Task
+                    </span>
+                </Button>
+            </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-10 gap-1">
-              <ListFilter className="h-3.5 w-3.5" />
-              <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                Filter
-              </span>
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-48">
-            <DropdownMenuLabel>Filter by Priority</DropdownMenuLabel>
-            <DropdownMenuSeparator />
+        <div className="flex items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Priority:</span>
             {PRIORITIES.map((p) => (
-              <DropdownMenuCheckboxItem
-                key={p.value}
-                checked={priorityFilter.includes(p.value)}
-                onCheckedChange={() => handlePriorityToggle(p.value)}
-              >
-                {p.label}
-              </DropdownMenuCheckboxItem>
+                <Button
+                    key={p.value}
+                    variant={priorityFilter.includes(p.value) ? "secondary" : "outline"}
+                    size="sm"
+                    onClick={() => handlePriorityToggle(p.value)}
+                >
+                    {p.label}
+                </Button>
             ))}
-             <DropdownMenuSeparator />
-            <DropdownMenuLabel>Filter by State</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {availableStates.map((s) => (
-              <DropdownMenuCheckboxItem
-                key={s}
-                checked={stateFilter.includes(s)}
-                onCheckedChange={() => handleStateToggle(s)}
-              >
-                {s}
-              </DropdownMenuCheckboxItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
-      <Button size="sm" className="h-10 gap-1" onClick={onAddTodo}>
-        <PlusCircle className="h-3.5 w-3.5" />
-        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-          Add Task
-        </span>
-      </Button>
+        </div>
     </div>
   );
 }
