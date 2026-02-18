@@ -5,11 +5,13 @@ import { suggestTodoState, type AiSuggestTodoStateInput } from "@/ai/flows/ai-su
 export async function getAiSuggestion(
   input: AiSuggestTodoStateInput
 ): Promise<string> {
-  try {
-    const result = await suggestTodoState(input);
-    return result.suggestedState;
-  } catch (error) {
-    console.error("AI suggestion failed:", error);
-    return "";
-  }
+  // AI functionality is temporarily disabled during refactoring.
+  // try {
+  //   const result = await suggestTodoState(input);
+  //   return result.suggestedState;
+  // } catch (error) {
+  //   console.error("AI suggestion failed:", error);
+  //   return "";
+  // }
+  return "";
 }

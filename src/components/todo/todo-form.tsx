@@ -1,14 +1,13 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { format } from "date-fns";
 
-import type { Priority, Todo } from "@/lib/types";
+import type { DisplayTodo, State, Todo } from "@/lib/types";
 import { PRIORITIES } from "@/lib/constants";
-import { getAiSuggestion } from "@/lib/actions";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -41,13 +40,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon, Sparkles, Loader2 } from "lucide-react";
+import { CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   label: z.string().min(1, "Label is required"),
   priority: z.enum(["low", "medium", "high"]),
-  state: z.string().min(1, "State is required"),
+  stateId: z.string().min(1, "State is required"),
   dueDate: z.date({ required_error: "A due date is required." }),
 });
 
@@ -56,9 +55,9 @@ type FormValues = z.infer<typeof formSchema>;
 interface TodoFormProps {
   isOpen: boolean;
   onClose: () => void;
-  onSave: (data: FormValues) => void;
-  todo: Todo | null;
-  availableStates: string[];
+  onSave: (data: Omit<Todo, "id" | "createdAt" | "updatedAt" | "userId">) => void;
+  todo: DisplayTodo | null;
+  availableStates: State[];
 }
 
 export function TodoForm({
@@ -68,53 +67,36 @@ export function TodoForm({
   todo,
   availableStates,
 }: TodoFormProps) {
-  const [isAiPending, startAiTransition] = useTransition();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       label: "",
       priority: "medium",
-      state: availableStates[0] || "",
+      stateId: availableStates[0]?.id || "",
       dueDate: new Date(),
     },
   });
 
   useEffect(() => {
     if (todo) {
+      const todoState = availableStates.find(s => s.name === todo.state);
       form.reset({
         label: todo.label,
         priority: todo.priority,
-        state: todo.state,
-        dueDate: new Date(todo.dueDate),
+        stateId: todoState?.id,
+        dueDate: todo.dueDate instanceof Date ? todo.dueDate : new Date(todo.dueDate),
       });
     } else {
+      const defaultState = availableStates.find(s => s.name.toLowerCase() === 'to-do') || availableStates[0];
       form.reset({
         label: "",
         priority: "medium",
-        state: availableStates.find(s => s.toLowerCase() === 'to-do') || availableStates[0] || "",
+        stateId: defaultState?.id || "",
         dueDate: new Date(new Date().setDate(new Date().getDate() + 1)),
       });
     }
   }, [todo, isOpen, form, availableStates]);
-
-  const handleAiSuggest = () => {
-    const { label, dueDate } = form.getValues();
-    if (!label) {
-      form.setError("label", { message: "Please enter a label for AI suggestion." });
-      return;
-    }
-    startAiTransition(async () => {
-      const suggestedState = await getAiSuggestion({
-        description: label,
-        dueDate: format(dueDate, "yyyy-MM-dd"),
-        availableStates,
-      });
-      if (suggestedState && availableStates.includes(suggestedState)) {
-        form.setValue("state", suggestedState, { shouldValidate: true });
-      }
-    });
-  };
 
   const onSubmit = (data: FormValues) => {
     onSave(data);
@@ -213,7 +195,7 @@ export function TodoForm({
             </div>
             <FormField
               control={form.control}
-              name="state"
+              name="stateId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>State</FormLabel>
@@ -226,26 +208,12 @@ export function TodoForm({
                       </FormControl>
                       <SelectContent>
                         {availableStates.map((s) => (
-                          <SelectItem key={s} value={s}>
-                            {s}
+                          <SelectItem key={s.id} value={s.id}>
+                            {s.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="icon"
-                      onClick={handleAiSuggest}
-                      disabled={isAiPending}
-                      aria-label="Suggest State with AI"
-                    >
-                      {isAiPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Sparkles className="h-4 w-4 text-primary" />
-                      )}
-                    </Button>
                   </div>
                   <FormMessage />
                 </FormItem>

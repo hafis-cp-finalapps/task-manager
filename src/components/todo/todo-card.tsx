@@ -8,7 +8,7 @@ import {
   MinusCircle,
   ArrowUpCircle,
 } from "lucide-react";
-import type { Priority, Todo } from "@/lib/types";
+import type { Priority, DisplayTodo } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 import {
@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/tooltip";
 
 interface TodoCardProps {
-  todo: Todo;
+  todo: DisplayTodo;
   onEdit: () => void;
   onDelete: () => void;
 }
@@ -52,7 +52,8 @@ const priorityIcons: Record<
 export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
   const PriorityIcon = priorityIcons[todo.priority].icon;
 
-  const dueDate = new Date(todo.dueDate);
+  const dueDate = todo.dueDate instanceof Date ? todo.dueDate : new Date(todo.dueDate);
+  const createdAt = todo.createdAt instanceof Date ? todo.createdAt : new Date(todo.createdAt);
   const isOverdue = new Date() > dueDate && todo.state !== "Done";
 
   return (
@@ -61,7 +62,7 @@ export function TodoCard({ todo, onEdit, onDelete }: TodoCardProps) {
         <div className="flex-1">
           <CardTitle className="text-lg font-semibold">{todo.label}</CardTitle>
           <CardDescription>
-            Created {formatDistanceToNow(new Date(todo.createdAt), { addSuffix: true })}
+            Created {formatDistanceToNow(createdAt, { addSuffix: true })}
           </CardDescription>
         </div>
         <DropdownMenu>

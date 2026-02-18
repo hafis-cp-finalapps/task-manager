@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { X } from "lucide-react";
+import type { State } from "@/lib/types";
 
 export function SettingsForm() {
   const { states, addState, deleteState } = useSettings();
@@ -39,15 +40,15 @@ export function SettingsForm() {
             <Button onClick={handleAddState}>Add State</Button>
           </div>
           <div className="flex flex-wrap gap-2">
-            {states.map((state) => (
-              <Badge key={state} variant="secondary" className="group text-sm pl-3 pr-1 py-1">
-                {state}
+            {states.map((state: State) => (
+              <Badge key={state.id} variant="secondary" className="group text-sm pl-3 pr-1 py-1">
+                {state.name}
                 <button
-                  onClick={() => deleteState(state)}
+                  onClick={() => deleteState(state.id)}
                   className="ml-2 rounded-full p-0.5 text-muted-foreground outline-none ring-offset-background transition-colors hover:bg-background/50 hover:text-foreground focus:ring-2 focus:ring-ring focus:ring-offset-2"
                 >
                   <X className="h-3 w-3" />
-                  <span className="sr-only">Delete {state}</span>
+                  <span className="sr-only">Delete {state.name}</span>
                 </button>
               </Badge>
             ))}

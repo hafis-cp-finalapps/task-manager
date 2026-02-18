@@ -1,10 +1,10 @@
-import type { Todo } from "@/lib/types";
+import type { DisplayTodo } from "@/lib/types";
 import { TodoCard } from "./todo-card";
 import { FileQuestion } from "lucide-react";
 
 interface TodoListProps {
-  todos: Todo[];
-  onEdit: (todo: Todo) => void;
+  todos: DisplayTodo[];
+  onEdit: (todo: DisplayTodo) => void;
   onDelete: (id: string) => void;
 }
 
