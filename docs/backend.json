@@ -28,6 +28,11 @@
           "type": "string",
           "description": "Timestamp indicating when the user profile was last updated.",
           "format": "date-time"
+        },
+        "webhookUrl": {
+          "type": "string",
+          "description": "The URL to which a webhook payload will be sent when a new task is created.",
+          "format": "uri"
         }
       },
       "required": [
@@ -190,3 +195,4 @@
     "reasoning": "The recommended Firestore structure for TaskFlow leverages a user-centric, hierarchical model to ensure robust security, scalability, and ease of debugging. All user-specific data, including their profile, custom states, and todo items, are nested directly under a top-level `/users/{userId}` document.\n\n**Authorization Independence:** This structure achieves Authorization Independence by placing all user-owned data as subcollections of the `/users/{userId}` path. For example, a user's todo items are found at `/users/{userId}/todos/{todoId}`. Firestore security rules can then directly use the `{userId}` wildcard from the path to verify `request.auth.uid == userId`, eliminating the need for expensive and complex `get()` calls to check parent documents for ownership. While `userId` is present in the `State` and `Todo` documents themselves, this is primarily for data integrity and easier data portability; the path remains the primary source of authorization context for rules. This design also supports atomic creation of a user's profile and initial settings or a todo and its sub-entities without breaking rule checks.\n\n**QAPs (Rules are not Filters):** This structure inherently supports secure `list` operations (QAPs). Since `states` and `todos` are subcollections of a specific user's path (`/users/{userId}/states` and `/users/{userId}/todos`), any `list` query made by an authenticated user to their own path (e.g., `db.collection('users').doc(request.auth.uid).collection('todos').get()`) will only ever return data owned by that user. The security rules will enforce that `request.auth.uid` matches `userId` in the path, preventing users from listing or accessing other users' private data. This means the application can confidently query these collections, knowing the security rules will correctly filter out unauthorized access at the database level, rather than relying on client-side filtering for security."
   }
 }
+    

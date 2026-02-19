@@ -28,3 +28,14 @@ export interface DisplayTodo extends Omit<Todo, 'dueDate' | 'createdAt' | 'updat
   createdAt: Date;
   updatedAt: Date;
 }
+
+export interface UserProfile {
+  id: string;
+  email: string;
+  displayName?: string;
+  createdAt: Timestamp | Date | string;
+  updatedAt: Timestamp | Date | string;
+  webhookUrl?: string;
+}
+
+    

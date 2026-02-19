@@ -4,10 +4,12 @@ import { useCollection, useFirebase, useMemoFirebase, useUser } from "@/firebase
 import { collection, doc, serverTimestamp } from "firebase/firestore";
 import { addDocumentNonBlocking, deleteDocumentNonBlocking, updateDocumentNonBlocking } from "@/firebase/non-blocking-updates";
 import type { Todo } from "@/lib/types";
+import { useUserProfile } from "./use-user-profile";
 
 export function useTodos() {
   const { firestore } = useFirebase();
   const { user } = useUser();
+  const { profile } = useUserProfile();
 
   const todosQuery = useMemoFirebase(() => {
     if (!user) return null;
@@ -24,7 +26,30 @@ export function useTodos() {
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     };
-    addDocumentNonBlocking(todosQuery, newTodo);
+    
+    const docPromise = addDocumentNonBlocking(todosQuery, newTodo);
+
+    if (profile?.webhookUrl) {
+      docPromise.then(docRef => {
+        const payload = {
+          ...todoData,
+          id: docRef.id,
+          userId: user.uid,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+
+        fetch(profile.webhookUrl!, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        }).catch(err => {
+          console.error("Webhook POST failed:", err);
+        });
+      });
+    }
   };
 
   const updateTodo = (id: string, updatedData: Partial<Omit<Todo, "id" | "createdAt" | "userId">>) => {
@@ -41,3 +66,5 @@ export function useTodos() {
 
   return { todos: todos || [], addTodo, updateTodo, deleteTodo, isLoading, error };
 }
+
+    
