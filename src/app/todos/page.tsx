@@ -62,12 +62,12 @@ export default function TodosPage() {
   };
 
   const handleSaveTodo = (todoData: Omit<Todo, "id" | "createdAt" | "updatedAt" | "userId">) => {
+    closeForm();
     if (editingTodo) {
       updateTodo(editingTodo.id, todoData);
     } else {
       addTodo(todoData);
     }
-    closeForm();
   };
 
   const handleDeleteTodo = (id: string) => {
