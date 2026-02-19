@@ -6,7 +6,7 @@ import { useSettings } from "@/hooks/use-settings";
 import type { Priority, Todo, DisplayTodo, State } from "@/lib/types";
 import { useUser } from "@/firebase";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import { Loader2, PlusCircle } from "lucide-react";
 
 import { Header } from "@/components/header";
 import { TodoToolbar } from "@/components/todo/todo-toolbar";
@@ -23,12 +23,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 
 export default function TodosPage() {
   const { user, isUserLoading } = useUser();
   const router = useRouter();
 
-  const { todos, addTodo, updateTodo, deleteTodo } = useTodos();
+  const { todos, addTodo, updateTodo, deleteTodo, isLoading: areTodosLoading } = useTodos();
   const { states, addState, isSettingsLoading } = useSettings();
 
   const [editingTodo, setEditingTodo] = useState<DisplayTodo | null>(null);
@@ -113,7 +114,7 @@ export default function TodosPage() {
       );
   }, [displayTodos, searchTerm, priorityFilter, stateFilter, states]);
   
-  if (isUserLoading || isSettingsLoading) {
+  if (isUserLoading || isSettingsLoading || areTodosLoading) {
      return (
       <div className="flex h-screen w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -125,21 +126,37 @@ export default function TodosPage() {
     <div className="flex min-h-screen w-full flex-col">
       <Header />
       <main className="flex flex-1 flex-col gap-4 p-4 md:gap-8 md:p-8">
-        <TodoToolbar
-          searchTerm={searchTerm}
-          onSearchTermChange={setSearchTerm}
-          priorityFilter={priorityFilter}
-          onPriorityFilterChange={setPriorityFilter}
-          stateFilter={stateFilter}
-          onStateFilterChange={setStateFilter}
-          onAddTodo={openFormForNew}
-          availableStates={states.map(s => s.name)}
-        />
-        <TodoList
-          todos={filteredTodos}
-          onEdit={openFormForEdit}
-          onDelete={handleDeleteTodo}
-        />
+        {todos.length === 0 ? (
+          <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
+            <div className="flex flex-col items-center gap-2 text-center text-muted-foreground">
+              <h3 className="text-2xl font-bold tracking-tight">You have no tasks</h3>
+              <p className="text-sm">Get started by creating your first task.</p>
+              <Button className="mt-4" onClick={openFormForNew}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                Add Task
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <TodoToolbar
+              searchTerm={searchTerm}
+              onSearchTermChange={setSearchTerm}
+              priorityFilter={priorityFilter}
+              onPriorityFilterChange={setPriorityFilter}
+              stateFilter={stateFilter}
+              onStateFilterChange={setStateFilter}
+              onAddTodo={openFormForNew}
+              availableStates={states.map(s => s.name)}
+            />
+            <TodoList
+              todos={filteredTodos}
+              onEdit={openFormForEdit}
+              onDelete={handleDeleteTodo}
+              onAddTodo={openFormForNew}
+            />
+          </>
+        )}
       </main>
       <TodoForm
         isOpen={isFormOpen}

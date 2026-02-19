@@ -1,14 +1,16 @@
 import type { DisplayTodo } from "@/lib/types";
 import { TodoCard } from "./todo-card";
-import { FileQuestion } from "lucide-react";
+import { FileQuestion, PlusCircle } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface TodoListProps {
   todos: DisplayTodo[];
   onEdit: (todo: DisplayTodo) => void;
   onDelete: (id: string) => void;
+  onAddTodo: () => void;
 }
 
-export function TodoList({ todos, onEdit, onDelete }: TodoListProps) {
+export function TodoList({ todos, onEdit, onDelete, onAddTodo }: TodoListProps) {
   if (todos.length === 0) {
     return (
       <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed shadow-sm">
@@ -18,6 +20,10 @@ export function TodoList({ todos, onEdit, onDelete }: TodoListProps) {
           <p className="text-sm">
             Try adjusting your filters or create a new task.
           </p>
+          <Button className="mt-4" onClick={onAddTodo}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            Add Task
+          </Button>
         </div>
       </div>
     );
