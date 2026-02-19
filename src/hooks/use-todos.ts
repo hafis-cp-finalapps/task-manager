@@ -31,6 +31,11 @@ export function useTodos() {
 
     if (profile?.webhookUrl) {
       docPromise.then(docRef => {
+        // If docRef is undefined (e.g., Firestore write failed and was caught), do nothing.
+        if (!docRef) {
+          return;
+        }
+
         const payload = {
           ...todoData,
           id: docRef.id,
@@ -39,15 +44,24 @@ export function useTodos() {
           updatedAt: new Date().toISOString(),
         };
 
-        fetch(profile.webhookUrl!, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(payload),
-        }).catch(err => {
-          console.error("Webhook POST failed:", err);
-        });
+        try {
+          // Validate the URL before attempting to fetch
+          const url = new URL(profile.webhookUrl!);
+          
+          fetch(url.toString(), {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          }).catch(err => {
+            // This will catch network errors (including CORS) after the fetch has been initiated.
+            console.error("Webhook POST request failed:", err);
+          });
+        } catch (err) {
+          // This will catch errors from `new URL()` if the URL is malformed.
+          console.error("Invalid webhook URL provided:", profile.webhookUrl, err);
+        }
       });
     }
   };
@@ -66,5 +80,3 @@ export function useTodos() {
 
   return { todos: todos || [], addTodo, updateTodo, deleteTodo, isLoading, error };
 }
-
-    
